@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>妙麗年齡計算機</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Noto Sans TC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      text-align: center;
+      background: url("https://hackmd.io/_uploads/Hyc4usZlWe.png") no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    /* 半透明白色卡片容器 */
+    .container {
+      background: rgba(255, 255, 255, 0.78);
+      padding: 40px 30px;
+      max-width: 480px;
+      margin: 80px auto;
+      border-radius: 20px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 25px;
+      color: #444;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .dog-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid #ffb84d;
+      font-size: 20px;
+      font-weight: bold;
+      color: #ff9f00;
+      background-color: #fff7e6;
+    }
+
+    .input-section {
+      margin: 20px 0;
+      font-size: 18px;
+      color: #333;
+    }
+
+    label {
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+
+    input[type="date"] {
+      font-size: 16px;
+      padding: 8px 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #aaa;
+      min-width: 200px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 12px 25px;
+      font-size: 18px;
+      background-color: #ffb84d;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      color: #fff;
+      font-weight: 600;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    }
+
+    button:hover {
+      background-color: #ff9f00;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    .result {
+      margin-top: 30px;
+      font-size: 20px;
+      line-height: 1.8;
+      color: #333;
+      min-height: 60px;
+    }
+
+    .result strong {
+      color: #d87b02;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        margin: 40px 16px;
+        padding: 30px 20px;
+      }
+
+      h1 {
+        font-size: 22px;
+      }
+
+      .result {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>
+      <span class="dog-icon">狗</span>
+      妙麗年齡計算機
+    </h1>
+
+    <div class="input-section">
+      <label for="dog-birth">狗狗生日：</label><br />
+      <input type="date" id="dog-birth" />
+    </div>
+
+    <button id="calc-btn">開始計算</button>
+
+    <div class="result" id="result">
+      <!-- 計算結果會顯示在這裡 -->
+    </div>
+  </div>
+
+  <script>
+    const birthInputEl = document.getElementById("dog-birth");
+    const resultDiv = document.getElementById("result");
+    const calcBtn = document.getElementById("calc-btn");
+
+    /* ---------------------------
+       1. 頁面載入時：讀取 localStorage
+    --------------------------- */
+    window.addEventListener("load", function () {
+      const savedBirthday = localStorage.getItem("dogBirthday");
+
+      if (savedBirthday) {
+        birthInputEl.value = savedBirthday;
+        calculateAge(savedBirthday);
+      }
+    });
+
+    /* ---------------------------
+       2. 當生日改變時，自動儲存
+    --------------------------- */
+    birthInputEl.addEventListener("change", function () {
+      const birthday = this.value;
+
+      if (birthday) {
+        localStorage.setItem("dogBirthday", birthday);
+      }
+    });
+
+    /* ---------------------------
+       3. 點擊按鈕時計算 + 儲存
+    --------------------------- */
+    calcBtn.addEventListener("click", function () {
+      const birthday = birthInputEl.value;
+
+      if (!birthday) {
+        resultDiv.innerHTML = "<p>請先選擇狗狗生日喔！</p>";
+        return;
+      }
+
+      localStorage.setItem("dogBirthday", birthday);
+      calculateAge(birthday);
+    });
+
+    /* ---------------------------
+       4. 核心計算函數
+    --------------------------- */
+    function calculateAge(birthInput) {
+      const birthDate = new Date(birthInput);
+      const today = new Date();
+
+      const diffTime = today - birthDate;
+      const dogAgeYears = diffTime / (1000 * 60 * 60 * 24 * 365.25);
+
+      if (dogAgeYears < 0) {
+        resultDiv.innerHTML = "<p>生日日期不能在未來喔！</p>";
+        return;
+      }
+
+      const dogAgeDisplay = dogAgeYears.toFixed(2);
+
+      // AKC 換算成人年齡公式
+      let humanAge = 0;
+      if (dogAgeYears <= 1) {
+        humanAge = dogAgeYears * 15;
+      } else if (dogAgeYears <= 2) {
+        humanAge = 15 + (dogAgeYears - 1) * 9;
+      } else {
+        humanAge = 15 + 9 + (dogAgeYears - 2) * 5;
+      }
+
+      humanAge = humanAge.toFixed(0);
+
+      // 儲存計算結果
+      localStorage.setItem("dogAge", dogAgeDisplay);
+      localStorage.setItem("humanAge", humanAge);
+
+      resultDiv.innerHTML = `
+        <p>妙麗現在大約 <strong>${dogAgeDisplay}</strong> 歲囉！</p>
+        <p>換算成人類年齡大約是 <strong>${humanAge}</strong> 歲！</p>
+      `;
+    }
+  </script>
+</body>
+</html>
